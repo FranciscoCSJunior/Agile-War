@@ -40,6 +40,3 @@ npm run build
 npm run preview
 ```
 
-## Observação sobre o gabarito
-
-A questão 2 da Revisão 3 foi transcrita com o gabarito oficial fornecido (alternativa B). Pela leitura literal das afirmações, a alternativa C ("III e IV") pareceria mais consistente, mas o gabarito oficial (B) foi mantido como fonte de verdade no jogo — ver comentário em `src/data/questions.ts`.
