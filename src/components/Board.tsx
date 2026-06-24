@@ -200,7 +200,14 @@ export function Board() {
             stroke={stroke}
             strokeWidth={strokeWidth}
             strokeLinejoin="round"
-            className={clickable ? 'territory-path clickable' : 'territory-path'}
+            className={[
+              'territory-path',
+              clickable ? 'clickable' : '',
+              isValidAttackTarget ? 'attack-target' : '',
+              isValidFortifyTarget ? 'fortify-target' : '',
+            ]
+              .filter(Boolean)
+              .join(' ')}
             style={{ transition: 'fill-opacity 0.2s, stroke 0.15s, stroke-width 0.15s' }}
             onClick={() => {
               if (phase === 'attack' || clickable) handleClick(t.id);

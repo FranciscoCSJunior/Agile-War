@@ -943,3 +943,31 @@
   text-overflow: ellipsis;
   max-width: 130px;
 }
+
+/* ---------- Efeito de brilho pulsante para alvos de ataque/fortificação ---------- */
+
+.territory-path.attack-target {
+  animation: pulseAttackGlow 1.5s infinite alternate;
+}
+
+@keyframes pulseAttackGlow {
+  from {
+    filter: drop-shadow(0 0 3px rgba(255, 82, 82, 0.6));
+  }
+  to {
+    filter: drop-shadow(0 0 9px rgba(255, 82, 82, 1));
+  }
+}
+
+.territory-path.fortify-target {
+  animation: pulseFortifyGlow 1.5s infinite alternate;
+}
+
+@keyframes pulseFortifyGlow {
+  from {
+    filter: drop-shadow(0 0 3px rgba(163, 230, 53, 0.6));
+  }
+  to {
+    filter: drop-shadow(0 0 9px rgba(163, 230, 53, 1));
+  }
+}
