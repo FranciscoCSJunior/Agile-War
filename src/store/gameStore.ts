@@ -125,6 +125,27 @@ function drawQuestion(deck: Question[]): { question: Question; rest: Question[] 
   return { question, rest };
 }
 
+function simplifyQuestion(question: Question, targetCount: number): Question {
+  const correctAlt = question.alternatives[question.correctIndex];
+  
+  // Filtra as alternativas incorretas
+  const wrongAlts = question.alternatives.filter((_, idx) => idx !== question.correctIndex);
+  
+  // Embaralha e escolhe as incorretas necessárias
+  const shuffledWrongs = shuffle(wrongAlts);
+  const selectedWrongs = shuffledWrongs.slice(0, targetCount - 1);
+  
+  // Junta a correta com as incorretas selecionadas e re-embaralha a lista final
+  const newAlts = shuffle([correctAlt, ...selectedWrongs]);
+  const newCorrectIndex = newAlts.indexOf(correctAlt);
+  
+  return {
+    ...question,
+    alternatives: newAlts,
+    correctIndex: newCorrectIndex,
+  };
+}
+
 function nextActivePlayerIndex(players: Player[], fromIndex: number): number {
   const n = players.length;
   let idx = fromIndex;
@@ -351,10 +372,22 @@ export const useGameStore = create<GameStore>()((set, get) => ({
       return;
     }
 
+    const sourceArmies = s.territories[s.selectedSource].armies;
+    const targetArmies = target.armies;
+    const ratio = sourceArmies / targetArmies;
+
     const { question, rest } = drawQuestion(s.quizDeck);
+
+    let finalQuestion = question;
+    if (ratio >= 5) {
+      finalQuestion = simplifyQuestion(question, 2);
+    } else if (ratio >= 3) {
+      finalQuestion = simplifyQuestion(question, 3);
+    }
+
     set({
       quizDeck: rest,
-      pendingQuestion: question,
+      pendingQuestion: finalQuestion,
       pendingAttack: { sourceId: s.selectedSource, targetId: territoryId },
       actionHint: null,
     });
