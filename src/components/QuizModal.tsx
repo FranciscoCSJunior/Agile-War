@@ -4,6 +4,7 @@ import { TERRITORY_MAP } from '../data/mapData';
 const LETTERS = ['A', 'B', 'C', 'D', 'E'];
 
 export function QuizModal() {
+  const territories = useGameStore((s) => s.territories);
   const pendingQuestion = useGameStore((s) => s.pendingQuestion);
   const pendingAttack = useGameStore((s) => s.pendingAttack);
   const feedback = useGameStore((s) => s.feedback);
@@ -11,6 +12,18 @@ export function QuizModal() {
   const closeFeedback = useGameStore((s) => s.closeFeedback);
 
   if (!pendingQuestion && !feedback) return null;
+
+  let advantageNotice = '';
+  if (pendingAttack) {
+    const sourceArmies = territories[pendingAttack.sourceId]?.armies ?? 0;
+    const targetArmies = territories[pendingAttack.targetId]?.armies ?? 0;
+    const ratio = sourceArmies / targetArmies;
+    if (ratio >= 5) {
+      advantageNotice = '⚡ Apenas duas opções por motivos de superioridade numérica esmagadora de suas forças!';
+    } else if (ratio >= 3) {
+      advantageNotice = '⚔️ Apenas três opções por motivos de superioridade numérica de suas forças!';
+    }
+  }
 
   return (
     <div className="modal-overlay">
@@ -26,6 +39,11 @@ export function QuizModal() {
               )}
               <p className="quiz-question">{pendingQuestion.text}</p>
             </div>
+            {advantageNotice && (
+              <div className="quiz-advantage-notice">
+                {advantageNotice}
+              </div>
+            )}
             <div className="quiz-alternatives">
               {pendingQuestion.alternatives.map((alt, i) => (
                 <button
