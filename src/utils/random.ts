@@ -8,12 +8,12 @@ export function shuffle<T>(arr: T[]): T[] {
 }
 
 export const PLAYER_COLORS = [
-  '#d42b2b', // vermelho
-  '#1a5fb4', // azul
-  '#e6c619', // amarelo
-  '#26a65b', // verde
-  '#1a1a1a', // preto
-  '#f0f0f0', // branco
+  '#ff4d4d', // vermelho
+  '#3b82f6', // azul
+  '#ffca28', // amarelo
+  '#10b981', // verde
+  '#a855f7', // roxo
+  '#f8fafc', // branco
 ];
 
 export const PLAYER_COLOR_NAMES = [
@@ -21,7 +21,7 @@ export const PLAYER_COLOR_NAMES = [
   'Azul',
   'Amarelo',
   'Verde',
-  'Preto',
+  'Roxo',
   'Branco',
 ];
 

@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useGameStore } from '../store/gameStore';
 import {
   ADJACENCY,
@@ -8,13 +8,15 @@ import {
   LAYOUT,
   SEA_ROUTES,
   TERRITORIES,
-  TERRITORY_BOUNDARY_PATHS,
   TERRITORY_PATHS,
   VIEWBOX_HEIGHT,
   VIEWBOX_WIDTH,
 } from '../data/mapData';
 
 export function Board() {
+  const [hoveredTerritoryId, setHoveredTerritoryId] = useState<string | null>(null);
+  const [mousePos, setMousePos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+
   const phase = useGameStore((s) => s.phase);
   const players = useGameStore((s) => s.players);
   const currentPlayerIndex = useGameStore((s) => s.currentPlayerIndex);
@@ -22,6 +24,7 @@ export function Board() {
   const selectedSource = useGameStore((s) => s.selectedSource);
   const fortifyTarget = useGameStore((s) => s.fortifyTarget);
   const setupPlayerIndex = useGameStore((s) => s.setupPlayerIndex);
+  const hoveredContinentId = useGameStore((s) => s.hoveredContinentId);
 
   const placeSetupArmy = useGameStore((s) => s.placeSetupArmy);
   const selectAttackSource = useGameStore((s) => s.selectAttackSource);
@@ -37,6 +40,23 @@ export function Board() {
     players.forEach((p) => (map[p.id] = p.color));
     return map;
   }, [players]);
+
+  const hoveredTerritory = useMemo(() => {
+    if (!hoveredTerritoryId) return null;
+    return TERRITORIES.find((t) => t.id === hoveredTerritoryId);
+  }, [hoveredTerritoryId]);
+
+  const hoveredTerritoryState = hoveredTerritory ? territories[hoveredTerritory.id] : null;
+
+  const hoveredTerritoryContinent = useMemo(() => {
+    if (!hoveredTerritory) return null;
+    return CONTINENTS.find((c) => c.id === hoveredTerritory.continentId);
+  }, [hoveredTerritory]);
+
+  const hoveredTerritoryOwner = useMemo(() => {
+    if (!hoveredTerritoryState?.ownerId) return null;
+    return players.find((p) => p.id === hoveredTerritoryState.ownerId);
+  }, [hoveredTerritoryState, players]);
 
   const validAttackTargets = useMemo(() => {
     if (phase !== 'attack' || !selectedSource) return new Set<string>();
@@ -101,8 +121,9 @@ export function Board() {
   }
 
   return (
-    <svg
-      className="board-svg"
+    <>
+      <svg
+        className="board-svg"
       viewBox={`0 0 ${VIEWBOX_WIDTH} ${VIEWBOX_HEIGHT}`}
       preserveAspectRatio="xMidYMid meet"
       role="img"
@@ -134,7 +155,7 @@ export function Board() {
         const d = TERRITORY_PATHS[t.id];
         if (!d) return null;
         const state = territories[t.id];
-        const owned = state?.ownerId ? playerColorOf[state.ownerId] : '#4a4f5e';
+        const owned = state?.ownerId ? playerColorOf[state.ownerId] : '#2c3540';
         const isSelected = selectedSource === t.id;
         const isFortifyTarget = fortifyTarget === t.id;
         const isValidAttackTarget = validAttackTargets.has(t.id);
@@ -151,29 +172,47 @@ export function Board() {
 
         // divisas de países: hairline escuro
         let stroke = 'rgba(0,0,0,0.4)';
-        let strokeWidth = 0.4;
+        let strokeWidth = 0.3;
         if (isSelected || isFortifyTarget) {
-          stroke = '#ffffff'; strokeWidth = 2.5;
+          stroke = '#ffffff'; strokeWidth = 1.5;
         } else if (isValidAttackTarget) {
-          stroke = '#ff5252'; strokeWidth = 2.5;
+          stroke = '#ff5252'; strokeWidth = 1.5;
         } else if (isValidFortifyTarget) {
-          stroke = '#a3e635'; strokeWidth = 2.5;
+          stroke = '#a3e635'; strokeWidth = 1.5;
         } else if (isPotentialAttackSource) {
-          stroke = '#fbbf24'; strokeWidth = 2.5;
+          stroke = '#fbbf24'; strokeWidth = 1.5;
         }
+
+        if (hoveredTerritoryId === t.id) {
+          stroke = '#ffffff';
+          strokeWidth = 1.8;
+        }
+
+        const isContinentHovered = hoveredContinentId === t.continentId;
+        const fillOpacity = hoveredContinentId ? (isContinentHovered ? 1.0 : 0.25) : 1.0;
 
         return (
           <path
             key={t.id}
             d={d}
             fill={owned}
-            fillOpacity={1}
+            fillOpacity={fillOpacity}
             stroke={stroke}
             strokeWidth={strokeWidth}
             strokeLinejoin="round"
             className={clickable ? 'territory-path clickable' : 'territory-path'}
+            style={{ transition: 'fill-opacity 0.2s, stroke 0.15s, stroke-width 0.15s' }}
             onClick={() => {
               if (phase === 'attack' || clickable) handleClick(t.id);
+            }}
+            onMouseEnter={() => {
+              setHoveredTerritoryId(t.id);
+            }}
+            onMouseLeave={() => {
+              setHoveredTerritoryId(null);
+            }}
+            onMouseMove={(e) => {
+              setMousePos({ x: e.clientX, y: e.clientY });
             }}
           />
         );
@@ -183,16 +222,18 @@ export function Board() {
       {CONTINENTS.map((c) => {
         const d = CONTINENT_PATHS[c.id];
         if (!d) return null;
+        const isHovered = hoveredContinentId === c.id;
         return (
           <path
             key={`cont-${c.id}`}
             d={d}
             fill="none"
-            stroke={c.color}
-            strokeWidth={2.5}
-            strokeOpacity={0.9}
+            stroke={isHovered ? c.color : '#000000'}
+            strokeWidth={isHovered ? 2.5 : 1.2}
+            strokeOpacity={isHovered ? 1.0 : 0.8}
             strokeLinejoin="round"
             pointerEvents="none"
+            style={{ transition: 'stroke 0.2s, stroke-width 0.2s, stroke-opacity 0.2s' }}
           />
         );
       })}
@@ -227,12 +268,53 @@ export function Board() {
             <text textAnchor="middle" dy={4} className="army-count">
               {state?.armies ?? ''}
             </text>
-            <text textAnchor="middle" dy={22} className="territory-label">
-              {t.name}
+            <text textAnchor="middle" className="territory-label">
+              {t.name.split(' ').map((word, idx) => {
+                const dy = t.id === 'safe-large-solution'
+                  ? (idx === 0 ? -35 : 10)
+                  : (idx === 0 ? 25 : 10);
+                return (
+                  <tspan key={idx} x={0} dy={dy}>
+                    {word}
+                  </tspan>
+                );
+              })}
             </text>
           </g>
         );
       })}
     </svg>
+      {hoveredTerritoryId && hoveredTerritory && (
+        <div className="territory-tooltip" style={{ left: mousePos.x, top: mousePos.y }}>
+          <div className="tooltip-title">{hoveredTerritory.name}</div>
+          {hoveredTerritoryContinent && (
+            <div className="tooltip-row">
+              <span className="label">Método:</span>
+              <span className="value">
+                <span className="tooltip-color-swatch" style={{ background: hoveredTerritoryContinent.color }} />
+                {hoveredTerritoryContinent.fullName}
+              </span>
+            </div>
+          )}
+          <div className="tooltip-row">
+            <span className="label">Dono:</span>
+            <span className="value">
+              {hoveredTerritoryOwner ? (
+                <>
+                  <span className="tooltip-color-swatch" style={{ background: hoveredTerritoryOwner.color }} />
+                  {hoveredTerritoryOwner.name}
+                </>
+              ) : (
+                'Neutro'
+              )}
+            </span>
+          </div>
+          <div className="tooltip-row">
+            <span className="label">Exércitos:</span>
+            <span className="value">{hoveredTerritoryState?.armies ?? 0}</span>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

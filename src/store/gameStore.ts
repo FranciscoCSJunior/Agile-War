@@ -65,6 +65,8 @@ interface GameStore {
   endTurn: () => void;
 
   resetGame: () => void;
+  hoveredContinentId: string | null;
+  setHoveredContinentId: (id: string | null) => void;
 }
 
 const initialState = {
@@ -86,6 +88,7 @@ const initialState = {
   log: [] as string[],
   winnerId: null as string | null,
   winReason: null as WinReason | null,
+  hoveredContinentId: null as string | null,
 };
 
 function currentPlayerId(s: Pick<GameStore, 'players' | 'currentPlayerIndex'>): string {
@@ -536,6 +539,7 @@ export const useGameStore = create<GameStore>()((set, get) => ({
   },
 
   resetGame: () => set({ ...initialState }),
+  setHoveredContinentId: (id) => set({ hoveredContinentId: id }),
 }));
 
 export { computeReinforcements, ownedTerritoryIds, hasAnyValidAttack, continentFullyOwnedBy };

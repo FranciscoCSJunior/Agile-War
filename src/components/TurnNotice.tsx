@@ -1,5 +1,5 @@
 import { useGameStore } from '../store/gameStore';
-import { CONTINENT_MAP } from '../data/mapData';
+import { CONTINENT_MAP, TERRITORY_MAP } from '../data/mapData';
 
 export function TurnNotice() {
   const phase = useGameStore((s) => s.phase);
@@ -51,7 +51,12 @@ export function TurnNotice() {
     );
   } else if (phase === 'fortify') {
     if (selectedSource && fortifyTarget) {
-      message = <>Mover <strong>{fortifyAmount}</strong> exército{fortifyAmount !== 1 ? 's' : ''} — use a sidebar para ajustar.</>;
+      message = (
+        <>
+          Mover de <strong>{TERRITORY_MAP[selectedSource]?.name}</strong> para{' '}
+          <strong>{TERRITORY_MAP[fortifyTarget]?.name}</strong> (<strong>{fortifyAmount}</strong> exército{fortifyAmount !== 1 ? 's' : ''}).
+        </>
+      );
       action = (
         <button type="button" className="turn-notice-btn" onClick={confirmFortify}>
           Confirmar e finalizar turno ✓

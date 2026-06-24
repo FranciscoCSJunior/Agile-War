@@ -329,10 +329,6 @@
 /* ---------- Card de jogadores (canto inferior esquerdo) ---------- */
 
 .players-card {
-  position: absolute;
-  bottom: 16px;
-  left: 16px;
-  z-index: 9;
   display: flex;
   flex-direction: column;
   gap: 3px;
@@ -343,7 +339,7 @@
   border-radius: 16px;
   padding: 10px;
   min-width: 220px;
-  pointer-events: none;
+  pointer-events: auto;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
 }
 
@@ -782,4 +778,168 @@
     max-height: 40vh;
     border-radius: 12px;
   }
+}
+
+/* ---------- Hover Tooltip ---------- */
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -95%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -100%);
+  }
+}
+
+.territory-tooltip {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  background: rgba(13, 17, 23, 0.88);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: #f0f0f3;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.6);
+  font-family: var(--sans);
+  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transform: translate(-50%, -100%);
+  margin-top: -15px; /* Offset it above the cursor */
+  animation: tooltipFadeIn 0.18s ease-out forwards;
+  min-width: 160px;
+}
+
+.tooltip-title {
+  font-weight: 700;
+  font-size: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 4px;
+  margin-bottom: 2px;
+  color: #ffffff;
+}
+
+.tooltip-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  line-height: 1.4;
+}
+
+.tooltip-row .label {
+  opacity: 0.6;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  width: 75px;
+  flex-shrink: 0;
+}
+
+.tooltip-row .value {
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tooltip-color-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  flex-shrink: 0;
+}
+
+/* ---------- Container do Canto Inferior Esquerdo ---------- */
+
+.bottom-left-container {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  z-index: 99;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
+  pointer-events: none;
+}
+
+/* ---------- Card de Territórios / Métodos ---------- */
+
+.territories-card {
+  display: flex;
+  flex-direction: column;
+  background: rgba(10, 13, 22, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 10px;
+  min-width: 220px;
+  pointer-events: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.tc-header {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: #4a5270;
+  text-transform: uppercase;
+  padding: 0 6px 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  margin-bottom: 4px;
+}
+
+.tc-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tc-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+}
+
+.tc-row:hover,
+.tc-row.active {
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateX(4px);
+}
+
+.tc-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.tc-name {
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--tc-color);
+  width: 55px;
+  flex-shrink: 0;
+}
+
+.tc-fullname {
+  font-size: 10px;
+  color: #9ca3af;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 130px;
 }

@@ -6,6 +6,7 @@ import { Board } from './components/Board';
 import { Sidebar } from './components/Sidebar';
 import { TurnNotice } from './components/TurnNotice';
 import { PlayersCard } from './components/PlayersCard';
+import { TerritoriesCard } from './components/TerritoriesCard';
 import { QuizModal } from './components/QuizModal';
 import { GameOverScreen } from './components/GameOverScreen';
 
@@ -33,7 +34,10 @@ function App() {
     <div className="app-root">
       <div className="game-layout">
         <Board />
-        <PlayersCard />
+        <div className="bottom-left-container">
+          <TerritoriesCard />
+          <PlayersCard />
+        </div>
         <TurnNotice />
         <Sidebar open={sidebarOpen} onToggle={() => setSidebarOpen((o) => !o)} />
       </div>
