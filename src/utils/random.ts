@@ -8,21 +8,21 @@ export function shuffle<T>(arr: T[]): T[] {
 }
 
 export const PLAYER_COLORS = [
-  '#f5f5f5', // branco
-  '#3a3a3a', // preto/grafite
-  '#ff4fa3', // magenta
-  '#22d3ee', // ciano
-  '#a3e635', // lima
-  '#b45309', // âmbar/marrom
+  '#ff4d4d', // vermelho
+  '#3b82f6', // azul
+  '#ffca28', // amarelo
+  '#10b981', // verde
+  '#a855f7', // roxo
+  '#f8fafc', // branco
 ];
 
 export const PLAYER_COLOR_NAMES = [
+  'Vermelho',
+  'Azul',
+  'Amarelo',
+  'Verde',
+  'Roxo',
   'Branco',
-  'Grafite',
-  'Magenta',
-  'Ciano',
-  'Lima',
-  'Âmbar',
 ];
 
 export const SETUP_POOL_BY_PLAYERS: Record<number, number> = {

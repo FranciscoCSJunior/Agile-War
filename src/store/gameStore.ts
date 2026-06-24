@@ -65,6 +65,8 @@ interface GameStore {
   endTurn: () => void;
 
   resetGame: () => void;
+  hoveredContinentId: string | null;
+  setHoveredContinentId: (id: string | null) => void;
 }
 
 const initialState = {
@@ -86,6 +88,7 @@ const initialState = {
   log: [] as string[],
   winnerId: null as string | null,
   winReason: null as WinReason | null,
+  hoveredContinentId: null as string | null,
 };
 
 function currentPlayerId(s: Pick<GameStore, 'players' | 'currentPlayerIndex'>): string {
@@ -172,12 +175,42 @@ export const useGameStore = create<GameStore>()((set, get) => ({
       objectiveContinentId: shuffledContinentIds[i],
     }));
 
-    const shuffledTerritoryIds = shuffle(ALL_TERRITORY_IDS);
-    const territories: Record<string, TerritoryState> = {};
-    shuffledTerritoryIds.forEach((id, i) => {
-      const owner = players[i % players.length];
-      territories[id] = { ownerId: owner.id, armies: 1 };
-    });
+    let territories: Record<string, TerritoryState> = {};
+    let foundValid = false;
+    let attempts = 0;
+
+    while (attempts < 2000) {
+      const shuffledTerritoryIds = shuffle(ALL_TERRITORY_IDS);
+      const tempTerritories: Record<string, TerritoryState> = {};
+      shuffledTerritoryIds.forEach((id, i) => {
+        const owner = players[i % players.length];
+        tempTerritories[id] = { ownerId: owner.id, armies: 1 };
+      });
+
+      // Verifica se nenhum jogador possui territórios no seu continente objetivo
+      const isValid = players.every((p) => {
+        const objectiveContinent = CONTINENT_MAP[p.objectiveContinentId];
+        return objectiveContinent.territoryIds.every(
+          (tId) => tempTerritories[tId]?.ownerId !== p.id
+        );
+      });
+
+      if (isValid) {
+        territories = tempTerritories;
+        foundValid = true;
+        break;
+      }
+      attempts++;
+    }
+
+    if (!foundValid) {
+      // Fallback em caso de emergência (segurança adicional)
+      const shuffledTerritoryIds = shuffle(ALL_TERRITORY_IDS);
+      shuffledTerritoryIds.forEach((id, i) => {
+        const owner = players[i % players.length];
+        territories[id] = { ownerId: owner.id, armies: 1 };
+      });
+    }
 
     const poolPerPlayer = SETUP_POOL_BY_PLAYERS[numPlayers] ?? 5;
     const setupPool: Record<string, number> = {};
@@ -536,6 +569,7 @@ export const useGameStore = create<GameStore>()((set, get) => ({
   },
 
   resetGame: () => set({ ...initialState }),
+  setHoveredContinentId: (id) => set({ hoveredContinentId: id }),
 }));
 
 export { computeReinforcements, ownedTerritoryIds, hasAnyValidAttack, continentFullyOwnedBy };
