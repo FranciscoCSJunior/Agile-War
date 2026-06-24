@@ -9,7 +9,12 @@ const PHASE_LABEL: Record<string, string> = {
   gameover: 'Fim de Jogo',
 };
 
-export function Sidebar() {
+interface SidebarProps {
+  open: boolean;
+  onToggle: () => void;
+}
+
+export function Sidebar({ open, onToggle }: SidebarProps) {
   const phase = useGameStore((s) => s.phase);
   const players = useGameStore((s) => s.players);
   const currentPlayerIndex = useGameStore((s) => s.currentPlayerIndex);
@@ -54,7 +59,17 @@ export function Sidebar() {
   const activePlayer = phase === 'setup-placement' ? players[setupPlayerIndex] : players[currentPlayerIndex];
 
   return (
-    <aside className="sidebar">
+    <aside className={open ? 'sidebar' : 'sidebar collapsed'}>
+      <button
+        type="button"
+        className="sidebar-toggle-btn"
+        onClick={onToggle}
+        title={open ? 'Minimizar painel' : 'Expandir painel'}
+      >
+        {open ? '‹' : '›'}
+      </button>
+
+      {open && <div className="sidebar-content">
       <div className="turn-banner" style={{ borderColor: activePlayer?.color }}>
         <span className="swatch" style={{ background: activePlayer?.color }} />
         <div>
@@ -213,6 +228,7 @@ export function Sidebar() {
             ))}
         </div>
       </div>
+      </div>}
     </aside>
   );
 }
